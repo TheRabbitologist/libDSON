@@ -24,28 +24,17 @@ THE SOFTWARE.
 
 static std::string read(std::istream& in) {
     std::string str;
-    bool ws = true, isstr = false, isesc = false;
+    bool ws = true;
     char c;
     while(ws) {
         c = in.get();
         if(!std::isspace(c))
             ws = false;
     }
-    while(!ws || isstr) {
-        if(!isesc)
-            str.push_back(c);
+    while(!ws) {
+        str.push_back(c);
         c = in.get();
-        if(c == '\"' && !isesc)
-            isstr = !isstr;
-        if(c == '\\')
-            isesc = true;
-        else {
-            if(isesc) {
-                //TODO.
-            }
-            isesc = false;
-        }
-        if(!isstr && std::isspace(c))
+        if(std::isspace(c))
             ws = true;
     }
     return str;
