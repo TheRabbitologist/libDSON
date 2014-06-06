@@ -28,7 +28,8 @@ THE SOFTWARE.
 #define	DSON_HPP
 
 enum DsonEntryType {
-    STRING, NUMBER, ARRAY, OBJECT, BOOLEAN, EMPTY, ERROR
+    STRING, NUMBER, ARRAY, OBJECT, BOOLEAN, EMPTY, ERROR, 
+    END, DELIM
 };
 
 enum ImplementPreference {
@@ -62,12 +63,12 @@ struct DsonNumber : public DsonValue {
 
 struct DsonArray : public DsonValue {
     DsonArray() : DsonValue(ARRAY) {}
-    std::vector<DsonValue> val;
+    std::vector<DsonValue*> val;
 };
 
 struct DsonObject : public DsonValue {
     DsonObject() : DsonValue(OBJECT) {}
-    std::map<std::string,DsonValue> val;
+    std::map<std::string,DsonValue*> val;
 };
 
 struct DsonBoolean : public DsonValue {

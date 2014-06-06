@@ -22,6 +22,14 @@ THE SOFTWARE.
 #include "dson.hpp"
 #include <cctype>
 
+struct DsonPrivDelim : public DsonValue {
+    explicit DsonPrivDelim() : DsonValue(DELIM) {}
+};
+
+struct DsonPrivEnd : public DsonValue {
+    explicit DsonPrivEnd() : DsonValue(END) {}
+};
+
 static std::string read(std::istream& in) {
     std::string str;
     bool ws = true;
@@ -46,11 +54,13 @@ static DsonValue* parseValue(std::istream& in) {
 }
 
 static DsonArray* makeArray(std::istream& in) {
-    std::string str;
-    for(str = read(in); str != "many"; str = read(in)) {
-        
+    DsonArray* arr = new DsonArray();
+    DsonValue* valu = parseValue(in);
+    while(valu->getEntryType() != END && valu->getEntryType() != ERROR) {
+        arr->val.push_back(valu);
+        valu = parseValue(in);
     }
-    return new DsonArray();
+    return arr;
 }
 
 static DsonObject* makeObject(std::istream& in) {
