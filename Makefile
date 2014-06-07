@@ -11,6 +11,7 @@ dson.a:
 
 clean:
 	$(RM) dson.o
+	$(RM) dson.a
 
 clobber:
 
