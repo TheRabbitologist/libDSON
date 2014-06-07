@@ -82,8 +82,10 @@ static DsonValue* makeObject(std::istream& in) {
             return valu;
         }
         if(temp.empty()) {
-            if(valu->getEntryType() != STRING)
+            if(valu->getEntryType() != STRING) {
+                delete valu;
                 return new DsonError("Expected string as identifier for a DSON object");
+            }
             temp.assign(static_cast<DsonString*>(valu)->val);
             delete valu;
         }
