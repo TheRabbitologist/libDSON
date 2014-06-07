@@ -23,12 +23,8 @@ THE SOFTWARE.
 #include <cctype>
 #include <string>
 
-struct DsonPrivDelim : public DsonValue {
-    explicit DsonPrivDelim() : DsonValue(DELIM) {}
-};
-
-struct DsonPrivEnd : public DsonValue {
-    explicit DsonPrivEnd() : DsonValue(END) {}
+struct DsonFormat : public DsonValue {
+    explicit DsonFormat(DsonValue val) : DsonValue(val) {}
 };
 
 static std::string read(std::istream& in) {
@@ -50,7 +46,6 @@ static std::string read(std::istream& in) {
 }
 
 static DsonValue* parseValue(std::istream& in) {
-    std::string str = read(in);
     return new DsonError("NYI");
 }
 
