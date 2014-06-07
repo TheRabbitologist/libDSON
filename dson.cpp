@@ -81,9 +81,10 @@ static DsonValue* parseValueNumber(std::istream& in) {
     try {
         double val;
         if (pos != std::string::npos) {
-            int exp = std::stoi(temp.substr(pos + 4));
+            int exp;
+            std::stringstream(temp.substr(pos + 4)) >> std::oct >> exp;
             val = octal_stod(temp.substr(pos));
-            val = val * std::pow(10, exp);
+            val = val * std::pow(8, exp);
         } else {
             val = octal_stod(temp);
         }

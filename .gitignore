@@ -2,5 +2,7 @@ build
 dist
 nbproject
 dson.o
+test.o
 dson.a
 .dep.inc
+test

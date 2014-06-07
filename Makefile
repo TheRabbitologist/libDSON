@@ -8,11 +8,13 @@ build: dson.a
 
 dson.a:
 	$(CXX) -c *.cpp
-	ar rvs $(OUTPUT) *.o
+	ar rvs $(OUTPUT) dson.o
+	$(CXX) -o test test.o
 
 clean:
 	$(RM) *.o
 	$(RM) $(OUTPUT)
+	$(RM) "test"
 
 clobber:
 
