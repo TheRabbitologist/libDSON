@@ -49,7 +49,22 @@ static std::string read(std::istream& in) {
 }
 
 static double octal_stod(const std::string& str) {
-    return 0.0;
+    size_t dot = str.find('.'), end = str.size()-1;
+    dot = std::min(end+1,dot);
+    double ret;
+    for(size_t ing = dot, x = 1; ing <= end; ++ing, ++x) {
+        if(str[ing] >= '0' && str[ing] < '8')
+            ret += static_cast<double>(str[ing]-'0')/std::pow(8,x);
+    }
+    for(size_t ing = end, x = 0; ing >= 0; --ing, ++x) {
+        if(ing == 0 && str[ing] == '-') {
+            ret *= -1.0;
+            break;
+        }
+        if(str[ing] >= '0' && str[ing] < '8')
+            ret += (str[ing]-'0')*std::pow(8,x);
+    }
+    return ret;
 }
 
 static DsonValue parseValueNumber(std::istream& in) {
@@ -63,7 +78,7 @@ static DsonValue parseValueNumber(std::istream& in) {
         double val;
         if (pos != std::string::npos) {
             int exp = std::stoi(temp.substr(pos + 4));
-            val = std::stod(temp.substr(pos));
+            val = octal_stod(temp.substr(pos));
             val = val * std::pow(10, exp);
         } else {
             val = octal_stod(temp);
