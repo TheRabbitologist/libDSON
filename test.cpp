@@ -6,5 +6,9 @@
 
 #include "dson.hpp"
 
+#include <iostream>
+
 int main() {
+    DsonValue* v = parseDson("42very3");
+    std::cout << static_cast<DsonNumber*>(v)->val << std::endl;
 }

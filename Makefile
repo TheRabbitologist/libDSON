@@ -9,7 +9,7 @@ build: dson.a
 dson.a:
 	$(CXX) -c *.cpp
 	ar rvs $(OUTPUT) dson.o
-	$(CXX) -o test test.o
+	$(CXX) -o test test.o dson.o
 
 clean:
 	$(RM) *.o
