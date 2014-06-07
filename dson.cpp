@@ -51,7 +51,7 @@ static std::string read(std::istream& in) {
 static DsonValue* parseValue(std::istream& in) {
     char c = in.peek();
     DsonValue* ret = nullptr;
-    if (std::isdigit(c)) {
+    if (std::isdigit(c) || c == '-') {
         std::string temp = std::tolower(read(in));
         size_t pos = temp.find("very");
         if (pos != std::string::npos && pos + 4 >= temp.size())
