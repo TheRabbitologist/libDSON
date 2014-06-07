@@ -48,6 +48,10 @@ static std::string read(std::istream& in) {
     return str;
 }
 
+static double octal_stod(const std::string& str) {
+    return 0.0;
+}
+
 static DsonValue parseValueNumber(std::istream& in) {
     DsonValue* ret = nullptr;
     std::string temp = read(in);
@@ -62,7 +66,7 @@ static DsonValue parseValueNumber(std::istream& in) {
             val = std::stod(temp.substr(pos));
             val = val * std::pow(10, exp);
         } else {
-            val = std::stod(temp);
+            val = octal_stod(temp);
         }
         ret = new DsonNumber();
         static_cast<DsonNumber*> (ret)->val = val;
