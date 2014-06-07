@@ -21,6 +21,7 @@ THE SOFTWARE.
 
 #include "dson.hpp"
 #include <cctype>
+#include <string>
 
 struct DsonPrivDelim : public DsonValue {
     explicit DsonPrivDelim() : DsonValue(DELIM) {}
@@ -53,22 +54,50 @@ static DsonValue* parseValue(std::istream& in) {
     return new DsonError("NYI");
 }
 
-static DsonArray* makeArray(std::istream& in) {
+static DsonValue* makeArray(std::istream& in) {
     DsonArray* arr = new DsonArray();
     DsonValue* valu = parseValue(in);
-    while(valu->getEntryType() != END && valu->getEntryType() != ERROR) {
-        arr->val.push_back(valu);
+    while(valu->getEntryType() != END) {
+        if(valu->getEntryType() == ERROR) {
+            delete arr;
+            return valu;
+        }
+        if(valu->getEntryType() != DELIM)
+            arr->val.push_back(valu);
+        else
+            delete valu;
         valu = parseValue(in);
     }
+    delete valu;
     return arr;
 }
 
-static DsonObject* makeObject(std::istream& in) {
-    std::string str;
-    for(str = read(in); str != "wow"; str = read(in)) {
-        
+static DsonValue* makeObject(std::istream& in) {
+    DsonObject* obj = new DsonObject();
+    DsonValue* valu = parseValue(in);
+    std::string temp;
+    while(valu->getEntryType() != END) {
+        if(valu->getEntryType() == ERROR) {
+            delete obj;
+            return valu;
+        }
+        if(temp.empty()) {
+            if(valu->getEntryType() != STRING)
+                return new DsonError("Expected string as identifier for a DSON object");
+            temp.assign(static_cast<DsonString*>(valu)->val);
+            delete valu;
+        }
+        else {
+            if(valu->getEntryType() != DELIM) {
+                obj->val[temp] = valu;
+                temp.clear();
+            }
+            else
+                delete valu;
+        }
+        valu = parseValue(in);
     }
-    return new DsonObject();
+    return obj;
 }
 
 DsonValue* parseDson(std::istream& in) {
