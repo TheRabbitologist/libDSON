@@ -52,15 +52,16 @@ static DsonValue* parseValue(std::istream& in) {
     char c = in.peek();
     DsonValue* ret = nullptr;
     if (std::isdigit(c) || c == '-') {
-        std::string temp = std::tolower(read(in));
+        std::string temp = read(in);
+        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
         size_t pos = temp.find("very");
         if (pos != std::string::npos && pos + 4 >= temp.size())
             return new DsonError("Found \"very\" with nothing after it.");
         try {
             double val;
-            int exp = std::stoi(temp.substr(pos + 4));
             if (pos != std::string::npos) {
-                double val = std::stod(temp.substr(pos));
+                int exp = std::stoi(temp.substr(pos + 4));
+                val = std::stod(temp.substr(pos));
                 val = val * std::pow(10, exp);
             } else {
                 val = std::stod(temp);
