@@ -1,17 +1,18 @@
 MKDIR=mkdir
 CP=cp
 CXX?=CXX
+OUTPUT?=dson.a
 CCADMIN=CCadmin
 
 build: dson.a
 
 dson.a:
-	$(CXX) -c dson.cpp
-	ar rvs dson.a dson.o
+	$(CXX) -c *.cpp
+	ar rvs $(OUTPUT) *.o
 
 clean:
-	$(RM) dson.o
-	$(RM) dson.a
+	$(RM) *.o
+	$(RM) $(OUTPUT)
 
 clobber:
 

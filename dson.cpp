@@ -17,47 +17,74 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
+ */
 
 #include "dson.hpp"
 #include <cctype>
+#include <cmath>
 #include <string>
 
 struct DsonFormat : public DsonValue {
-    explicit DsonFormat(DsonValue val) : DsonValue(val) {}
+
+    explicit DsonFormat(DsonValue val) : DsonValue(val) {
+    }
 };
 
 static std::string read(std::istream& in) {
     std::string str;
     bool ws = true;
     char c;
-    while(ws) {
+    while (ws) {
         c = in.get();
-        if(!std::isspace(c))
+        if (!std::isspace(c))
             ws = false;
     }
-    while(!ws) {
+    while (!ws) {
         str.push_back(c);
         c = in.get();
-        if(std::isspace(c))
+        if (std::isspace(c))
             ws = true;
     }
     return str;
 }
 
 static DsonValue* parseValue(std::istream& in) {
+    char c = in.peek();
+    DsonValue* ret = nullptr;
+    if (std::isdigit(c)) {
+        std::string temp = std::tolower(read(in));
+        size_t pos = temp.find("very");
+        if (pos != std::string::npos && pos + 4 >= temp.size())
+            return new DsonError("Found \"very\" with nothing after it.");
+        try {
+            double val;
+            int exp = std::stoi(temp.substr(pos + 4));
+            if (pos != std::string::npos) {
+                double val = std::stod(temp.substr(pos));
+                val = val * std::pow(10, exp);
+            } else {
+                val = std::stod(temp);
+            }
+            ret = new DsonNumber();
+            static_cast<DsonNumber*> (ret)->val = val;
+        } catch (const std::invalid_argument& e) {
+            return new DsonError("Syntax error while creating a number.");
+        }
+    }
+    if (ret != nullptr)
+        return ret;
     return new DsonError("NYI");
 }
 
 static DsonValue* makeArray(std::istream& in) {
     DsonArray* arr = new DsonArray();
     DsonValue* valu = parseValue(in);
-    while(valu->getEntryType() != END) {
-        if(valu->getEntryType() == ERROR) {
+    while (valu->getEntryType() != END) {
+        if (valu->getEntryType() == ERROR) {
             delete arr;
             return valu;
         }
-        if(valu->getEntryType() != DELIM)
+        if (valu->getEntryType() != DELIM)
             arr->val.push_back(valu);
         else
             delete valu;
@@ -71,25 +98,23 @@ static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
     std::string temp;
-    while(valu->getEntryType() != END) {
-        if(valu->getEntryType() == ERROR) {
+    while (valu->getEntryType() != END) {
+        if (valu->getEntryType() == ERROR) {
             delete obj;
             return valu;
         }
-        if(temp.empty()) {
-            if(valu->getEntryType() != STRING) {
+        if (temp.empty()) {
+            if (valu->getEntryType() != STRING) {
                 delete valu;
                 return new DsonError("Expected string as identifier for a DSON object");
             }
-            temp.assign(static_cast<DsonString*>(valu)->val);
+            temp.assign(static_cast<DsonString*> (valu)->val);
             delete valu;
-        }
-        else {
-            if(valu->getEntryType() != DELIM) {
+        } else {
+            if (valu->getEntryType() != DELIM) {
                 obj->val[temp] = valu;
                 temp.clear();
-            }
-            else
+            } else
                 delete valu;
         }
         valu = parseValue(in);
