@@ -48,30 +48,41 @@ static std::string read(std::istream& in) {
     return str;
 }
 
+static DsonValue parseValueNumber(std::istream& in) {
+    DsonValue* ret = nullptr;
+    std::string temp = read(in);
+    std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+    size_t pos = temp.find("very");
+    if (pos != std::string::npos && pos + 4 >= temp.size())
+        return new DsonError("Found \"very\" with nothing after it.");
+    try {
+        double val;
+        if (pos != std::string::npos) {
+            int exp = std::stoi(temp.substr(pos + 4));
+            val = std::stod(temp.substr(pos));
+            val = val * std::pow(10, exp);
+        } else {
+            val = std::stod(temp);
+        }
+        ret = new DsonNumber();
+        static_cast<DsonNumber*> (ret)->val = val;
+    } catch (const std::invalid_argument& e) {
+        return new DsonError("Syntax error while creating a number.");
+    }
+    return ret;
+}
+
 static DsonValue* parseValue(std::istream& in) {
     char c = in.peek();
     DsonValue* ret = nullptr;
-    if (std::isdigit(c) || c == '-') {
-        std::string temp = read(in);
-        std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
-        size_t pos = temp.find("very");
-        if (pos != std::string::npos && pos + 4 >= temp.size())
-            return new DsonError("Found \"very\" with nothing after it.");
-        try {
-            double val;
-            if (pos != std::string::npos) {
-                int exp = std::stoi(temp.substr(pos + 4));
-                val = std::stod(temp.substr(pos));
-                val = val * std::pow(10, exp);
-            } else {
-                val = std::stod(temp);
-            }
-            ret = new DsonNumber();
-            static_cast<DsonNumber*> (ret)->val = val;
-        } catch (const std::invalid_argument& e) {
-            return new DsonError("Syntax error while creating a number.");
-        }
+    while(std::isspace(c)) {
+        in.ignore();
+        c = in.peek();
     }
+    if (std::isdigit(c) || c == '-')
+        ret = parseValueNumber(in);
+    if (c == '"')
+        ret = parseValueNumber(in);
     if (ret != nullptr)
         return ret;
     return new DsonError("NYI");
