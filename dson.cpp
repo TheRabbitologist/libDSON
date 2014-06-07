@@ -50,24 +50,28 @@ static std::string read(std::istream& in) {
 
 static double octal_stod(const std::string& str) {
     size_t dot = str.find('.'), end = str.size()-1;
-    dot = std::min(end+1,dot);
+    dot = std::min(end,dot);
     double ret;
-    for(size_t ing = dot, x = 1; ing <= end; ++ing, ++x) {
+    for(size_t ing = dot+1, x = 1; ing <= end; ++ing, ++x) {
         if(str[ing] >= '0' && str[ing] < '8')
             ret += static_cast<double>(str[ing]-'0')/std::pow(8,x);
+        else
+            throw std::invalid_argument("input is not octal number");
     }
-    for(size_t ing = end, x = 0; ing >= 0; --ing, ++x) {
+    for(size_t ing = end, x = 0; ing <= end; --ing, ++x) {
         if(ing == 0 && str[ing] == '-') {
             ret *= -1.0;
             break;
         }
         if(str[ing] >= '0' && str[ing] < '8')
             ret += (str[ing]-'0')*std::pow(8,x);
+        else
+            throw std::invalid_argument("input is not octal number");
     }
     return ret;
 }
 
-static DsonValue parseValueNumber(std::istream& in) {
+static DsonValue* parseValueNumber(std::istream& in) {
     DsonValue* ret = nullptr;
     std::string temp = read(in);
     std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
