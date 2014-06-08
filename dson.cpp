@@ -25,6 +25,7 @@ THE SOFTWARE.
 #include <string>
 #include <iostream>
 
+//Ambiguity resolution named constants for DSON numbers.
 const int VERY_MULT = 10;
 const auto VERY_BASE = std::oct;
 
@@ -72,9 +73,9 @@ static DsonValue* parseValueNumber(std::istream& in) {
         double val;
         if (pos != std::string::npos) {
             int exp = 1;
-            std::stringstream(temp.substr(pos + 4)) >> VERY_BASE >> exp; //TODO: Ambiguity.
+            std::stringstream(temp.substr(pos + 4)) >> VERY_BASE >> exp;
             val = octal_stod(temp.substr(0,pos));
-            val = val * std::pow(VERY_MULT, exp); //TODO: Ambiguity.
+            val = val * std::pow(VERY_MULT, exp);
         } else {
             val = octal_stod(temp);
         }
@@ -82,6 +83,43 @@ static DsonValue* parseValueNumber(std::istream& in) {
         static_cast<DsonNumber*> (ret)->val = val;
     } catch (const std::invalid_argument& e) {
         return new DsonError(std::string("Syntax error while creating a number: ") + e.what());
+    }
+    return ret;
+}
+
+static DsonValue* parseValueString(std::istream& in) {
+    in.ignore();
+    DsonString* ret = new DsonString();
+    bool escape = false;
+    char c = ' ';
+    while(in.good()) {
+        c = in.get();
+        if(c == '\\') {
+            escape = true;
+            continue;
+        }
+        if(escape) {
+            escape = false;
+            switch(c) {
+                case '\\': break;
+                case '"': break;
+                case 'n': c = '\n'; break;
+                case 'b': c = '\b'; break;
+                case 't': c = '\t'; break;
+                case 'r': c = '\r'; break;
+                case 'f': c = '\f'; break;
+                case 'u': c = '\0';
+                    throw new DsonError(std::string("Octal UTF-16 stuffs NYI"));
+                    break;
+                default:
+                    delete ret;
+                    throw new DsonError(std::string("Illegal escape character: ")+c);
+            }
+            if(c == '\0')
+                continue;
+        } else if (c == '"')
+            break;
+        ret->val.push_back(c);
     }
     return ret;
 }
@@ -95,6 +133,8 @@ static DsonValue* parseValue(std::istream& in) {
     }
     if (std::isdigit(c) || c == '-')
         ret = parseValueNumber(in);
+    if (c == '"')
+        ret = parseValueString(in);
     if (ret != nullptr)
         return ret;
     return new DsonError("NYI");
@@ -121,7 +161,7 @@ static DsonValue* makeArray(std::istream& in) {
 static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
-    std::string temp;
+    std::u16string temp;
     while (valu->getEntryType() != END) {
         if (valu->getEntryType() == ERROR) {
             delete obj;
@@ -132,7 +172,7 @@ static DsonValue* makeObject(std::istream& in) {
                 delete valu;
                 return new DsonError("Expected string as identifier for a DSON object");
             }
-            temp.assign(static_cast<DsonString*> (valu)->val);
+            temp.assign(static_cast<DsonString*>(valu)->val);
             delete valu;
         } else {
             if (valu->getEntryType() != DELIM) {
