@@ -9,10 +9,10 @@
 #include <iostream>
 
 int main() {
-    DsonValue* v = parseDsonV2("\"\\\"Wabbagoogies\\\"");
+    DsonValue* v = parseDsonV2("such \"foo\" is \"bar\"");
     if(v->getEntryType() == ERROR) {
         std::cout << "FAIL: " << static_cast<DsonError*>(v)->what() << std::endl;
         return 0;
     }
-    std::wcout << static_cast<DsonString*>(v)->val << std::endl;
+    std::wcout << static_cast<DsonObject*>(v)->val[L"foo"] << std::endl;
 }

@@ -29,7 +29,7 @@ THE SOFTWARE.
 
 enum DsonEntryType {
     STRING, NUMBER, ARRAY, OBJECT, BOOLEAN, EMPTY, ERROR, 
-    END, DELIM
+    END_OBJ, END_ARR, DELIM_OBJ, DELIM_ARR, IS
 };
 
 struct DsonValue {

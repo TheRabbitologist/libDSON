@@ -29,11 +29,16 @@ THE SOFTWARE.
 const int VERY_MULT = 10;
 const auto VERY_BASE = std::oct;
 
-struct DsonFormat : public DsonValue {
-
-    explicit DsonFormat(DsonValue val) : DsonValue(val) {
-    }
+struct DsonFormatObj : public DsonValue {
+    explicit DsonFormatObj(bool b) : DsonValue(b?END_OBJ:DELIM_OBJ) {}
+    explicit DsonFormatObj() : DsonValue(IS) {}
 };
+
+struct DsonFormatArr : public DsonValue {
+    explicit DsonFormatArr(bool b) : DsonValue(b?END_ARR:DELIM_ARR) {}
+};
+
+static DsonValue* parseValue(std::istream& in);
 
 static double octal_stod(const std::string& str) {
     size_t dot = str.find('.'), end = str.size()-1;
@@ -131,31 +136,15 @@ static DsonValue* parseValueString(std::istream& in) {
     return ret;
 }
 
-static DsonValue* parseValue(std::istream& in) {
-    char c = in.peek();
-    DsonValue* ret = nullptr;
-    while(std::isspace(c) && in.good()) {
-        in.ignore();
-        c = in.peek();
-    }
-    if (std::isdigit(c) || c == '-')
-        ret = parseValueNumber(in);
-    if (c == '"')
-        ret = parseValueString(in);
-    if (ret != nullptr)
-        return ret;
-    return new DsonError("NYI");
-}
-
 static DsonValue* makeArray(std::istream& in) {
     DsonArray* arr = new DsonArray();
     DsonValue* valu = parseValue(in);
-    while (valu->getEntryType() != END) {
+    while (valu->getEntryType() != END_ARR) {
         if (valu->getEntryType() == ERROR) {
             delete arr;
             return valu;
         }
-        if (valu->getEntryType() != DELIM)
+        if (valu->getEntryType() != DELIM_ARR)
             arr->val.push_back(valu);
         else
             delete valu;
@@ -169,7 +158,7 @@ static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
     std::wstring temp;
-    while (valu->getEntryType() != END) {
+    while (valu->getEntryType() != END_OBJ) {
         if (valu->getEntryType() == ERROR) {
             delete obj;
             return valu;
@@ -182,7 +171,7 @@ static DsonValue* makeObject(std::istream& in) {
             temp.assign(static_cast<DsonString*>(valu)->val);
             delete valu;
         } else {
-            if (valu->getEntryType() != DELIM) {
+            if (valu->getEntryType() != DELIM_OBJ) {
                 obj->val[temp] = valu;
                 temp.clear();
             } else
@@ -191,6 +180,47 @@ static DsonValue* makeObject(std::istream& in) {
         valu = parseValue(in);
     }
     return obj;
+}
+
+static DsonValue* parseValue(std::istream& in) {
+    char c = in.peek();
+    while(std::isspace(c) && in.good()) {
+        in.ignore();
+        c = in.peek();
+    }
+    if (std::isdigit(c) || c == '-')
+        return parseValueNumber(in);
+    if (c == '"')
+        return parseValueString(in);
+    std::string str;
+    in >> str;
+    if(str == "yes") {
+        DsonBoolean* bl = new DsonBoolean();
+        bl->val = true;
+        return bl;
+    }
+    if(str == "no") {
+        DsonBoolean* bl = new DsonBoolean();
+        bl->val = false;
+        return bl;
+    }
+    if(str == "such")
+        return makeObject(in);
+    if(str == "so")
+        return makeArray(in);
+    if(str == "," || str == "." || str == "!" || str == "?")
+        return new DsonFormatObj(false);
+    if(str == "and" || str == "also")
+        return new DsonFormatArr(true);
+    if(str == "wow")
+        return new DsonFormatObj(false);
+    if(str == "many")
+        return new DsonFormatArr(true);
+    if(str == "is")
+        return new DsonFormatObj();
+    if(!in.good())
+        return new DsonError("Unexpected end of input");
+    return new DsonError("Syntax error on '" + str + "'");
 }
 
 DsonValue* parseDsonV2(std::istream& in) {
