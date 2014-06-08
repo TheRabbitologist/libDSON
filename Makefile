@@ -7,7 +7,7 @@ CCADMIN=CCadmin
 build: dson.a
 
 dson.a:
-	$(CXX) -c *.cpp
+	$(CXX) -std=c++11 -c *.cpp
 	ar rvs $(OUTPUT) dson.o
 	$(CXX) -o test test.o dson.o
 

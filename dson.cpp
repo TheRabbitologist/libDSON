@@ -25,6 +25,9 @@ THE SOFTWARE.
 #include <string>
 #include <iostream>
 
+const int VERY_MULT = 10;
+const auto VERY_BASE = std::oct;
+
 struct DsonFormat : public DsonValue {
 
     explicit DsonFormat(DsonValue val) : DsonValue(val) {
@@ -69,9 +72,9 @@ static DsonValue* parseValueNumber(std::istream& in) {
         double val;
         if (pos != std::string::npos) {
             int exp = 1;
-            std::stringstream(temp.substr(pos + 4)) >> std::oct >> exp; //TODO: Ambiguity.
+            std::stringstream(temp.substr(pos + 4)) >> VERY_BASE >> exp; //TODO: Ambiguity.
             val = octal_stod(temp.substr(0,pos));
-            val = val * std::pow(10, exp); //TODO: Ambiguity.
+            val = val * std::pow(VERY_MULT, exp); //TODO: Ambiguity.
         } else {
             val = octal_stod(temp);
         }
