@@ -91,14 +91,15 @@ static DsonValue* parseValueString(std::istream& in) {
     in.ignore();
     DsonString* ret = new DsonString();
     bool escape = false;
-    char c = ' ';
-    while(in.good()) {
-        c = in.get();
-        if(c == '\\') {
-            escape = true;
-            continue;
+    for(char c = in.get(); in.good(); c = in.get()) {
+        if(!escape) {
+            if(c == '\\') {
+                escape = true;
+                continue;
+            } else if (c == '"')
+                break;
         }
-        if(escape) {
+        else {
             escape = false;
             switch(c) {
                 case '\\': break;
@@ -109,17 +110,22 @@ static DsonValue* parseValueString(std::istream& in) {
                 case 'r': c = '\r'; break;
                 case 'f': c = '\f'; break;
                 case 'u': c = '\0';
-                    throw new DsonError(std::string("Octal UTF-16 stuffs NYI"));
+                    char buf[6];
+                    in.get(buf,6);
+                    uint32_t t = octal_stod(std::string(buf));
+                    if(t > std::numeric_limits<char16_t>::max()) {
+                        delete ret;
+                        return new DsonError(std::string("Escape sequence value exceeds max length of UTF-16"));
+                    }
+                    ret->val.push_back(static_cast<char16_t>(t));
                     break;
                 default:
                     delete ret;
-                    throw new DsonError(std::string("Illegal escape character: ")+c);
+                    return new DsonError(std::string("Illegal escape character: ")+c);
             }
-            if(c == '\0')
-                continue;
-        } else if (c == '"')
-            break;
-        ret->val.push_back(c);
+        }
+        if(c != '\0')
+            ret->val.push_back(c);
     }
     return ret;
 }
