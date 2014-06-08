@@ -193,10 +193,10 @@ static DsonValue* makeObject(std::istream& in) {
     return obj;
 }
 
-DsonValue* parseDson(std::istream& in) {
+DsonValue* parseDsonV2(std::istream& in) {
     return parseValue(in);
 }
 
-DsonValue* parseDson(std::istream&& in) {
+DsonValue* parseDsonV2(std::istream&& in) {
     return parseValue(in);
 }

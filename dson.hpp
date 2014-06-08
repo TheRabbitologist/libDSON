@@ -32,10 +32,6 @@ enum DsonEntryType {
     END, DELIM
 };
 
-enum ImplementPreference {
-    SMALL, FAST
-};
-
 struct DsonValue {
     DsonValue() : type(EMPTY) {};
     inline DsonEntryType getEntryType() {return type;}
@@ -76,11 +72,11 @@ struct DsonBoolean : public DsonValue {
     bool val;
 };
 
-DsonValue* parseDson(std::istream& in);
-DsonValue* parseDson(std::istream&& in);
+DsonValue* parseDsonV2(std::istream& in);
+DsonValue* parseDsonV2(std::istream&& in);
 
-inline DsonValue* parseDson(const std::string& in) {
-    return parseDson(std::stringstream(in));
+inline DsonValue* parseDsonV2(const std::string& in) {
+    return parseDsonV2(std::stringstream(in));
 }
 
 #endif	/* DSON_HPP */
