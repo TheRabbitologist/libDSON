@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include <cctype>
 #include <cmath>
 #include <string>
+#include <iostream>
 
 struct DsonFormat : public DsonValue {
 
@@ -30,50 +31,36 @@ struct DsonFormat : public DsonValue {
     }
 };
 
-static std::string read(std::istream& in) {
-    std::string str;
-    bool ws = true;
-    char c;
-    while (ws) {
-        c = in.get();
-        if (!std::isspace(c))
-            ws = false;
-    }
-    while (!ws) {
-        str.push_back(c);
-        c = in.get();
-        if (std::isspace(c))
-            ws = true;
-    }
-    return str;
-}
-
 static double octal_stod(const std::string& str) {
     size_t dot = str.find('.'), end = str.size()-1;
+    bool isdot = dot != std::string::npos;
     dot = std::min(end,dot);
-    double ret;
+    double ret = 0.0;
     for(size_t ing = dot+1, x = 1; ing <= end; ++ing, ++x) {
         if(str[ing] >= '0' && str[ing] < '8')
             ret += static_cast<double>(str[ing]-'0')/std::pow(8,x);
         else
-            throw std::invalid_argument("input is not octal number");
+            throw std::invalid_argument(std::string("found non-octal character: ")+str[ing]);
     }
-    for(size_t ing = end, x = 0; ing <= end; --ing, ++x) {
+    for(size_t ing = dot-(isdot?1:0), x = 0; ing <= end; --ing, ++x) {
         if(ing == 0 && str[ing] == '-') {
             ret *= -1.0;
             break;
         }
         if(str[ing] >= '0' && str[ing] < '8')
             ret += (str[ing]-'0')*std::pow(8,x);
-        else
-            throw std::invalid_argument("input is not octal number");
-    }
+        else 
+            throw std::invalid_argument(std::string("found non-octal character: ")+str[ing]);
+        if(ing == 0)
+            break;
+    };
     return ret;
 }
 
 static DsonValue* parseValueNumber(std::istream& in) {
     DsonValue* ret = nullptr;
-    std::string temp = read(in);
+    std::string temp;
+    in >> temp;
     std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
     size_t pos = temp.find("very");
     if (pos != std::string::npos && pos + 4 >= temp.size())
@@ -81,9 +68,9 @@ static DsonValue* parseValueNumber(std::istream& in) {
     try {
         double val;
         if (pos != std::string::npos) {
-            int exp;
+            int exp = 1;
             std::stringstream(temp.substr(pos + 4)) >> std::oct >> exp; //TODO: Ambiguity.
-            val = octal_stod(temp.substr(pos));
+            val = octal_stod(temp.substr(0,pos));
             val = val * std::pow(10, exp); //TODO: Ambiguity.
         } else {
             val = octal_stod(temp);
@@ -91,7 +78,7 @@ static DsonValue* parseValueNumber(std::istream& in) {
         ret = new DsonNumber();
         static_cast<DsonNumber*> (ret)->val = val;
     } catch (const std::invalid_argument& e) {
-        return new DsonError("Syntax error while creating a number.");
+        return new DsonError(std::string("Syntax error while creating a number: ") + e.what());
     }
     return ret;
 }
@@ -99,13 +86,11 @@ static DsonValue* parseValueNumber(std::istream& in) {
 static DsonValue* parseValue(std::istream& in) {
     char c = in.peek();
     DsonValue* ret = nullptr;
-    while(std::isspace(c)) {
+    while(std::isspace(c) && in.good()) {
         in.ignore();
         c = in.peek();
     }
     if (std::isdigit(c) || c == '-')
-        ret = parseValueNumber(in);
-    if (c == '"')
         ret = parseValueNumber(in);
     if (ret != nullptr)
         return ret;
