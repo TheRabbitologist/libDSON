@@ -101,6 +101,7 @@ static DsonValue* parseValueString(std::istream& in) {
         }
         else {
             escape = false;
+            uint32_t t = 0;
             switch(c) {
                 case '\\': break;
                 case '"': break;
@@ -112,12 +113,12 @@ static DsonValue* parseValueString(std::istream& in) {
                 case 'u': c = '\0';
                     char buf[6];
                     in.get(buf,6);
-                    uint32_t t = octal_stod(std::string(buf));
-                    if(t > std::numeric_limits<char16_t>::max()) {
+                    t = octal_stod(std::string(buf));
+                    if(t > std::numeric_limits<wchar_t>::max()) {
                         delete ret;
                         return new DsonError(std::string("Escape sequence value exceeds max length of UTF-16"));
                     }
-                    ret->val.push_back(static_cast<char16_t>(t));
+                    ret->val.push_back(static_cast<wchar_t>(t));
                     break;
                 default:
                     delete ret;
@@ -167,7 +168,7 @@ static DsonValue* makeArray(std::istream& in) {
 static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
-    std::u16string temp;
+    std::wstring temp;
     while (valu->getEntryType() != END) {
         if (valu->getEntryType() == ERROR) {
             delete obj;

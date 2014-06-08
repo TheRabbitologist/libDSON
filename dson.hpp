@@ -53,7 +53,7 @@ private:
 
 struct DsonString : public DsonValue {
     DsonString() : DsonValue(STRING) {}
-    std::u16string val;
+    std::wstring val;
 };
 
 struct DsonNumber : public DsonValue {
@@ -68,7 +68,7 @@ struct DsonArray : public DsonValue {
 
 struct DsonObject : public DsonValue {
     DsonObject() : DsonValue(OBJECT) {}
-    std::map<std::u16string,DsonValue*> val;
+    std::map<std::wstring,DsonValue*> val;
 };
 
 struct DsonBoolean : public DsonValue {
