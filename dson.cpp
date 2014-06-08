@@ -158,6 +158,7 @@ static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
     std::wstring temp;
+    bool foundIs = false;
     while (valu->getEntryType() != END_OBJ) {
         if (valu->getEntryType() == ERROR) {
             delete obj;
@@ -165,17 +166,24 @@ static DsonValue* makeObject(std::istream& in) {
         }
         if (temp.empty()) {
             if (valu->getEntryType() != STRING) {
+                int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected string as identifier for a DSON object");
+                return new DsonError("Expected string as key for a DSON object, got type #" + std::to_string(v));
             }
             temp.assign(static_cast<DsonString*>(valu)->val);
             delete valu;
         } else {
-            if (valu->getEntryType() != DELIM_OBJ) {
+            if (!foundIs && valu->getEntryType() == IS) {
+                foundIs = true;
+                delete valu;
+            } else if(foundIs) {
                 obj->val[temp] = valu;
                 temp.clear();
-            } else
+                foundIs = false;
+            } else if(!temp.empty()) {
                 delete valu;
+                return new DsonError("Expected 'is'");
+            }
         }
         valu = parseValue(in);
     }
@@ -185,7 +193,7 @@ static DsonValue* makeObject(std::istream& in) {
 static DsonValue* parseValue(std::istream& in) {
     char c = in.peek();
     while(std::isspace(c) && in.good()) {
-        in.ignore();
+        in.ignore(1);
         c = in.peek();
     }
     if (std::isdigit(c) || c == '-')
@@ -213,7 +221,7 @@ static DsonValue* parseValue(std::istream& in) {
     if(str == "and" || str == "also")
         return new DsonFormatArr(true);
     if(str == "wow")
-        return new DsonFormatObj(false);
+        return new DsonFormatObj(true);
     if(str == "many")
         return new DsonFormatArr(true);
     if(str == "is")

@@ -28,8 +28,9 @@ THE SOFTWARE.
 #define	DSON_HPP
 
 enum DsonEntryType {
-    STRING, NUMBER, ARRAY, OBJECT, BOOLEAN, EMPTY, ERROR, 
-    END_OBJ, END_ARR, DELIM_OBJ, DELIM_ARR, IS
+    STRING = 1, NUMBER = 2, BOOLEAN = 3, ARRAY = 4, OBJECT = 5, 
+    EMPTY = 0, ERROR = -1, 
+    END_OBJ = 25, END_ARR = 24, DELIM_OBJ = 15, DELIM_ARR = 14, IS = 35
 };
 
 struct DsonValue {
