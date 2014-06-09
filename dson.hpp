@@ -62,30 +62,35 @@ private:
 struct DsonString : public DsonValue {
     DsonString(std::wstring str) : DsonValue(STRING), val(str) {}
     DsonString() : DsonValue(STRING) {}
+    void serialize(std::ostream& out);
     std::wstring val;
 };
 
 struct DsonNumber : public DsonValue {
     DsonNumber(double value) : DsonValue(NUMBER), val(value) {}
     DsonNumber() : DsonValue(NUMBER) {}
+    void serialize(std::ostream& out);
     double val;
 };
 
 struct DsonArray : public DsonValue {
     DsonArray(const std::vector<DsonValue*>& arr) : DsonValue(ARRAY), val(arr) {}
     DsonArray() : DsonValue(ARRAY) {}
+    void serialize(std::ostream& out);
     std::vector<DsonValue*> val;
 };
 
 struct DsonObject : public DsonValue {
     DsonObject(std::map<std::wstring,DsonValue*> obj) : DsonValue(OBJECT), val(obj) {}
     DsonObject() : DsonValue(OBJECT) {}
+    void serialize(std::ostream& out);
     std::map<std::wstring,DsonValue*> val;
 };
 
 struct DsonBoolean : public DsonValue {
     DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
     DsonBoolean() : DsonValue(BOOLEAN) {}
+    void serialize(std::ostream& out) {out << (val?"yes":"no");}
     bool val;
 };
 
