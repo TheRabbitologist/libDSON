@@ -70,6 +70,12 @@ static DsonValue* parseValueNumber(std::istream& in) {
     DsonValue* ret = nullptr;
     std::string temp;
     in >> temp;
+    if(temp.length() > 1) {
+        if(temp.back() == ',' || temp.back() == '.' || temp.back() == '!' || temp.back() == '?') {
+            in.putback(temp.back());
+            temp.pop_back();
+        }
+    }
     std::transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
     size_t pos = temp.find("very");
     if (pos != std::string::npos && pos + 4 >= temp.size())
@@ -139,15 +145,28 @@ static DsonValue* parseValueString(std::istream& in) {
 static DsonValue* makeArray(std::istream& in) {
     DsonArray* arr = new DsonArray();
     DsonValue* valu = parseValue(in);
+    bool expectDelim = false;
     while (valu->getEntryType() != END_ARR) {
         if (valu->getEntryType() == ERROR) {
             delete arr;
             return valu;
         }
-        if (valu->getEntryType() != DELIM_ARR)
+        if (!expectDelim && valu->getEntryType() != DELIM_ARR) {
             arr->val.push_back(valu);
-        else
+            expectDelim = true;
+        }
+        else if(expectDelim && valu->getEntryType() == DELIM_ARR) {
             delete valu;
+            expectDelim = false;
+        }
+        else if(expectDelim && valu->getEntryType() != DELIM_ARR) {
+            delete valu;
+            return new DsonError("Expected array delimiter");
+        }
+        else if(!expectDelim && valu->getEntryType() == DELIM_ARR) {
+            delete valu;
+            return new DsonError("Unexpected array delimiter");
+        }
         valu = parseValue(in);
     }
     delete valu;
@@ -158,17 +177,27 @@ static DsonValue* makeObject(std::istream& in) {
     DsonObject* obj = new DsonObject();
     DsonValue* valu = parseValue(in);
     std::wstring temp;
-    bool foundIs = false;
+    bool foundIs = false, expectDelim = false;
     while (valu->getEntryType() != END_OBJ) {
         if (valu->getEntryType() == ERROR) {
             delete obj;
             return valu;
         }
         if (temp.empty()) {
-            if (valu->getEntryType() != STRING) {
+            if (!expectDelim && valu->getEntryType() != STRING) {
+                delete valu;
+                return new DsonError("Expected string as key for a DSON object");
+            }
+            else if (expectDelim && valu->getEntryType() != DELIM_OBJ) {
                 int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected string as key for a DSON object, got type #" + std::to_string(v));
+                return new DsonError("Expected delimiter in a DSON object");
+            }
+            else if (expectDelim) {
+                expectDelim = false;
+                delete valu;
+                valu = parseValue(in);
+                continue;
             }
             temp.assign(static_cast<DsonString*>(valu)->val);
             delete valu;
@@ -180,6 +209,7 @@ static DsonValue* makeObject(std::istream& in) {
                 obj->val[temp] = valu;
                 temp.clear();
                 foundIs = false;
+                expectDelim = true;
             } else if(!temp.empty()) {
                 delete valu;
                 return new DsonError("Expected 'is'");
@@ -202,6 +232,12 @@ static DsonValue* parseValue(std::istream& in) {
         return parseValueString(in);
     std::string str;
     in >> str;
+    if(str.length() > 1) {
+        if(str.back() == ',' || str.back() == '.' || str.back() == '!' || str.back() == '?') {
+            in.putback(str.back());
+            str.pop_back();
+        }
+    }
     if(str == "yes") {
         DsonBoolean* bl = new DsonBoolean();
         bl->val = true;
