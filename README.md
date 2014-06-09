@@ -1,10 +1,10 @@
 libDSON
 ===
-Such MIT-licence. Much DSON parse. Very unfinished. Wow.
+Such MIT-licence. Much DSON parse. Wow.
 
 This is a very basic C++ library for parsing DSON (Doge Serialized Object Notation) files, making it easy to integrate DSON parsing with virtually any C++ program.
 
-While primarily meant for parsing DSON v2 files, it will be possible to parse DSON v1 files as well.
+While primarily meant for parsing DSON v2 files, it will be possible to parse DSON v1 files in the future.
 
 This library consists of two files and has no dependencies beyond the standard C++ library, meaning it can be included directly into a project with minimal effort.
  
