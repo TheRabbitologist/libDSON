@@ -328,7 +328,11 @@ void DsonString::serialize(std::ostream& out) {
         else if (t == '\n')
             out << "\\n";
         else if (t > 0x7E || t < 0x20) {
-            //HANDLE
+            out << "\\u";
+            uint16_t val = t;
+            for(int i = 5; i >= 0; --i) {   
+                //HANDLE
+            }
         } else
             out << static_cast<char>(t);
 
