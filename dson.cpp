@@ -257,7 +257,7 @@ static DsonValue* parseValue(std::istream& in) {
     if(str == "," || str == "." || str == "!" || str == "?")
         return new DsonFormatObj(false);
     if(str == "and" || str == "also")
-        return new DsonFormatArr(true);
+        return new DsonFormatArr(false);
     if(str == "wow")
         return new DsonFormatObj(true);
     if(str == "many")
