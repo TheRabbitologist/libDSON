@@ -25,8 +25,7 @@ THE SOFTWARE.
 #include <string>
 #include <iostream>
 
-//Ambiguity resolution named constants for DSON numbers.
-const int VERY_MULT = 10;
+const int VERY_MULT = 8;
 const auto VERY_BASE = std::oct;
 
 struct DsonFormatObj : public DsonValue {
