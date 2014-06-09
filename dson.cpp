@@ -96,7 +96,7 @@ static DsonValue* parseValueNumber(std::istream& in) {
         return new DsonError(std::string("Syntax error while creating a number: ") + e.what());
     }
     return ret;
-}
+}   
 
 static DsonValue* parseValueString(std::istream& in) {
     in.ignore();
@@ -147,6 +147,7 @@ static DsonValue* makeArray(std::istream& in) {
     DsonValue* valu = parseValue(in);
     bool expectDelim = false;
     while (valu->getEntryType() != END_ARR) {
+        std::cerr << "LOOP";
         if (valu->getEntryType() == ERROR) {
             delete arr;
             return valu;
@@ -161,13 +162,17 @@ static DsonValue* makeArray(std::istream& in) {
         }
         else if(expectDelim && valu->getEntryType() != DELIM_ARR) {
             delete valu;
+            delete arr;
             return new DsonError("Expected array delimiter");
         }
         else if(!expectDelim && valu->getEntryType() == DELIM_ARR) {
             delete valu;
+            delete arr;
             return new DsonError("Unexpected array delimiter");
         }
+        std::cerr << "PRE: " << valu << std::endl;
         valu = parseValue(in);
+        std::cerr << "POST: " << valu << std::endl;
     }
     delete valu;
     return arr;
