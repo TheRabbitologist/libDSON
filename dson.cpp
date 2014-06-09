@@ -147,7 +147,6 @@ static DsonValue* makeArray(std::istream& in) {
     DsonValue* valu = parseValue(in);
     bool expectDelim = false;
     while (valu->getEntryType() != END_ARR) {
-        std::cerr << "LOOP";
         if (valu->getEntryType() == ERROR) {
             delete arr;
             return valu;
@@ -170,9 +169,7 @@ static DsonValue* makeArray(std::istream& in) {
             delete arr;
             return new DsonError("Unexpected array delimiter");
         }
-        std::cerr << "PRE: " << valu << std::endl;
         valu = parseValue(in);
-        std::cerr << "POST: " << valu << std::endl;
     }
     delete valu;
     return arr;
