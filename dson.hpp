@@ -46,7 +46,7 @@ struct DsonValue {
     inline bool isError() {
         return  type == ERROR;
     }
-    //virtual void serialize(std::ostream& out) {}
+    virtual void serialize(std::ostream& out) {}
 protected:
     DsonValue(DsonEntryType t) {this->type = t;}
     DsonEntryType type;
