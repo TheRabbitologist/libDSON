@@ -36,6 +36,16 @@ enum DsonEntryType {
 struct DsonValue {
     DsonValue() : type(EMPTY) {};
     inline DsonEntryType getEntryType() {return type;}
+    inline bool isValue() {
+        return  type == STRING || 
+                type == NUMBER || 
+                type == BOOLEAN || 
+                type == ARRAY || 
+                type == OBJECT;
+    }
+    inline bool isError() {
+        return  type == ERROR;
+    }
 protected:
     DsonValue(DsonEntryType t) {this->type = t;}
     DsonEntryType type;
