@@ -46,6 +46,7 @@ struct DsonValue {
     inline bool isError() {
         return  type == ERROR;
     }
+    //virtual void serialize(std::ostream& out) {}
 protected:
     DsonValue(DsonEntryType t) {this->type = t;}
     DsonEntryType type;
@@ -59,26 +60,31 @@ private:
 };
 
 struct DsonString : public DsonValue {
+    DsonString(std::wstring str) : DsonValue(STRING), val(str) {}
     DsonString() : DsonValue(STRING) {}
     std::wstring val;
 };
 
 struct DsonNumber : public DsonValue {
+    DsonNumber(double value) : DsonValue(NUMBER), val(value) {}
     DsonNumber() : DsonValue(NUMBER) {}
     double val;
 };
 
 struct DsonArray : public DsonValue {
+    DsonArray(const std::vector<DsonValue*>& arr) : DsonValue(ARRAY), val(arr) {}
     DsonArray() : DsonValue(ARRAY) {}
     std::vector<DsonValue*> val;
 };
 
 struct DsonObject : public DsonValue {
+    DsonObject(std::map<std::wstring,DsonValue*> obj) : DsonValue(OBJECT), val(obj) {}
     DsonObject() : DsonValue(OBJECT) {}
     std::map<std::wstring,DsonValue*> val;
 };
 
 struct DsonBoolean : public DsonValue {
+    DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
     DsonBoolean() : DsonValue(BOOLEAN) {}
     bool val;
 };
