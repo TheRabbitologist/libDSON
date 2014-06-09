@@ -83,12 +83,25 @@ struct DsonBoolean : public DsonValue {
     bool val;
 };
 
-DsonValue* parseDsonV2(std::istream& in);
-DsonValue* parseDsonV2(std::istream&& in);
-
-inline DsonValue* parseDsonV2(const std::string& in) {
-    return parseDsonV2(std::stringstream(in));
+DsonValue* parseDsonV2Value(std::istream& in);
+DsonValue* parseDsonV2Value(std::istream&& in);
+inline DsonValue* parseDsonV2Value(const std::string& in) {
+    return parseDsonV2Value(std::stringstream(in));
 }
+
+DsonObject* parseDsonV2Object(std::istream& in);
+DsonObject* parseDsonV2Object(std::istream&& in);
+inline DsonObject* parseDsonV2Object(const std::string& in) {
+    return parseDsonV2Object(std::stringstream(in));
+}
+
+DsonArray* parseDsonV2Array(std::istream& in);
+DsonArray* parseDsonV2Array(std::istream&& in);
+inline DsonArray* parseDsonV2Array(const std::string& in) {
+    return parseDsonV2Array(std::stringstream(in));
+}
+
+
 
 #endif	/* DSON_HPP */
 

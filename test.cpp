@@ -9,7 +9,7 @@
 #include <iostream>
 
 int main() {
-    DsonValue* v = parseDsonV2("so 42 also such \"foo\" is \"bar\" wow and 13 many");
+    DsonValue* v = parseDsonV2Value("so 42 also such \"foo\" is \"bar\" wow and 13 many");
     if(v->getEntryType() == ERROR) {
         std::cout << "FAIL: " << static_cast<DsonError*>(v)->what() << std::endl;
         return 0;

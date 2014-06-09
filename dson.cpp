@@ -269,10 +269,35 @@ static DsonValue* parseValue(std::istream& in) {
     return new DsonError("Syntax error on '" + str + "'");
 }
 
-DsonValue* parseDsonV2(std::istream& in) {
+DsonValue* parseDsonV2Value(std::istream& in) {
+    return parseValue(in);
+}
+DsonValue* parseDsonV2Value(std::istream&& in) {
     return parseValue(in);
 }
 
-DsonValue* parseDsonV2(std::istream&& in) {
-    return parseValue(in);
+DsonObject* parseDsonV2Object(std::istream& in) {
+    DsonValue* v = makeObject(in);
+    if(v->isError())
+        throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+    return static_cast<DsonObject*>(v);
+}
+DsonObject* parseDsonV2Object(std::istream&& in) {
+    DsonValue* v = makeObject(in);
+    if(v->isError())
+        throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+    return static_cast<DsonObject*>(v);
+}
+
+DsonArray* parseDsonV2Array(std::istream& in) {
+    DsonValue* v = makeArray(in);
+    if(v->isError())
+        throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+    return static_cast<DsonArray*>(v);
+}
+DsonArray* parseDsonV2Array(std::istream&& in) {
+    DsonValue* v = makeArray(in);
+    if(v->isError())
+        throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+    return static_cast<DsonArray*>(v);
 }
