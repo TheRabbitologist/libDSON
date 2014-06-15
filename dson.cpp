@@ -309,6 +309,10 @@ DsonArray* parseDsonV2Array(std::istream&& in) {
     return static_cast<DsonArray*> (v);
 }
 
+void DsonBoolean::serialize(std::ostream& out) {out << (val?"yes":"no");}
+
+void DsonNumber::serialize(std::ostream& out) {}
+
 void DsonString::serialize(std::ostream& out) {
     out.put('"');
     decltype(out.basefield) flg = out.flags() & (out.basefield);
@@ -330,9 +334,8 @@ void DsonString::serialize(std::ostream& out) {
         else if (t > 0x7E || t < 0x20) {
             out << "\\u";
             uint16_t val = t;
-            for(int i = 5; i >= 0; --i) {   
-                //HANDLE
-            }
+            for(int i = 5; i >= 0; --i)  
+                out << static_cast<int>(val/std::pow(8,i))%8;
         } else
             out << static_cast<char>(t);
 
@@ -340,3 +343,7 @@ void DsonString::serialize(std::ostream& out) {
     out.setf(flg);
     out.put('"');
 }
+
+void DsonArray::serialize(std::ostream& out) {}
+
+void DsonObject::serialize(std::ostream& out) {}

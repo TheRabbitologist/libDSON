@@ -14,5 +14,6 @@ int main() {
         std::cout << "FAIL: " << static_cast<DsonError*>(v)->what() << std::endl;
         return 0;
     }
-    std::wcout << static_cast<DsonString*>(static_cast<DsonObject*>(static_cast<DsonArray*>(v)->val[1])->val[L"foo"])->val << std::endl;
+    DsonString(L"Waffles\xDFHATE").serialize(std::cout);
+    std::cout << std::endl;
 }

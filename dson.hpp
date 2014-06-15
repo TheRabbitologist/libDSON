@@ -90,7 +90,7 @@ struct DsonObject : public DsonValue {
 struct DsonBoolean : public DsonValue {
     DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
     DsonBoolean() : DsonValue(BOOLEAN) {}
-    void serialize(std::ostream& out) {out << (val?"yes":"no");}
+    void serialize(std::ostream& out);
     bool val;
 };
 
@@ -111,8 +111,6 @@ DsonArray* parseDsonV2Array(std::istream&& in);
 inline DsonArray* parseDsonV2Array(const std::string& in) {
     return parseDsonV2Array(std::stringstream(in));
 }
-
-
 
 #endif	/* DSON_HPP */
 
