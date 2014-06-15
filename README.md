@@ -4,10 +4,6 @@ Such MIT-licence. Much DSON parse. Wow.
 
 This is a very basic C++ library for parsing and serializing DSON (Doge Serialized Object Notation) files, making it easy to integrate DSON parsing with virtually any C++ program.
 
-While primarily meant for parsing DSON v2 files, it may be possible to parse DSON v1 files in the future.
-
-At the moment, the library is limited to parsing. Serialization is currently in development.
-
 This library consists of two files and has no dependencies beyond the standard C++ library, meaning it can be included directly into a project with minimal effort.
  
 The provided makefile can be used to create a statically linked library on *nixes.
