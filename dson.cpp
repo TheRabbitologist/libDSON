@@ -314,11 +314,29 @@ void DsonBoolean::serialize(std::ostream& out) {
 }
 
 void DsonNumber::serialize(std::ostream& out) {
+    decltype(out.basefield) flg = out.flags() & (out.basefield);
+    double rem = val;
+    if(rem <= 0.0) {
+        out << '-';
+        rem *= -1.0;
+    }
+    uint64_t whole = static_cast<uint64_t>(std::abs(val));
+    out << std::oct << whole;
+    rem -= whole;
+    if(rem != 0.0) {
+        out << '.';
+        do {
+            rem *= 8.0;
+            unsigned int pt = static_cast<unsigned int>(rem);
+            out << pt;
+            rem -= pt;
+        } while(rem != 0.0);
+    }
+    out.setf(flg);
 }
 
 void DsonString::serialize(std::ostream& out) {
     out.put('"');
-    decltype(out.basefield) flg = out.flags() & (out.basefield);
     for (wchar_t t : val) {
         if (t == '\\')
             out << "\\\\";
@@ -343,7 +361,6 @@ void DsonString::serialize(std::ostream& out) {
             out << static_cast<char> (t);
 
     }
-    out.setf(flg);
     out.put('"');
 }
 

@@ -14,8 +14,7 @@ int main() {
         std::cout << "FAIL: " << static_cast<DsonError*>(v)->what() << std::endl;
         return 0;
     }
-    DsonObject obj;
-    obj.val[L"foo"] = new DsonString(L"bar");
-    obj.serialize(std::cout);
+    DsonNumber num(-0.25);
+    num.serialize(std::cout);
     std::cout << std::endl;
 }
