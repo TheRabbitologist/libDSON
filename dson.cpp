@@ -193,12 +193,13 @@ static DsonValue* makeObject(std::istream& in) {
         }
         if (temp.empty()) {
             if (!expectDelim && valu->getEntryType() != STRING) {
+                int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected string as key for a DSON object");
+                return new DsonError("Expected string as key for a DSON object, got type ");
             } else if (expectDelim && valu->getEntryType() != DELIM_OBJ) {
                 int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected delimiter in a DSON object");
+                return new DsonError("Expected delimiter in a DSON object, got type ");
             } else if (expectDelim) {
                 expectDelim = false;
                 delete valu;
@@ -282,31 +283,51 @@ DsonValue* parseDsonV2Value(std::istream&& in) {
 }
 
 DsonObject* parseDsonV2Object(std::istream& in) {
-    DsonValue* v = makeObject(in);
-    if (v->isError())
-        throw std::invalid_argument(static_cast<DsonError*> (v)->what());
-    return static_cast<DsonObject*> (v);
+    std::string str;
+    in >> str;
+    if(str == "such") {
+        DsonValue* v = makeObject(in);
+        if (v->isError())
+            throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+        return static_cast<DsonObject*> (v);
+    } else
+        throw std::invalid_argument("Argument is not a DSON object");
 }
 
 DsonObject* parseDsonV2Object(std::istream&& in) {
-    DsonValue* v = makeObject(in);
-    if (v->isError())
-        throw std::invalid_argument(static_cast<DsonError*> (v)->what());
-    return static_cast<DsonObject*> (v);
+    std::string str;
+    in >> str;
+    if(str == "such") {
+        DsonValue* v = makeObject(in);
+        if (v->isError())
+            throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+        return static_cast<DsonObject*> (v);
+    } else
+        throw std::invalid_argument("Argument is not a DSON object");
 }
 
 DsonArray* parseDsonV2Array(std::istream& in) {
-    DsonValue* v = makeArray(in);
-    if (v->isError())
-        throw std::invalid_argument(static_cast<DsonError*> (v)->what());
-    return static_cast<DsonArray*> (v);
+    std::string str;
+    in >> str;
+    if(str == "so") {
+        DsonValue* v = makeArray(in);
+        if (v->isError())
+            throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+        return static_cast<DsonArray*> (v);
+    } else
+        throw std::invalid_argument("Argument is not a DSON array");
 }
 
 DsonArray* parseDsonV2Array(std::istream&& in) {
-    DsonValue* v = makeArray(in);
-    if (v->isError())
-        throw std::invalid_argument(static_cast<DsonError*> (v)->what());
-    return static_cast<DsonArray*> (v);
+    std::string str;
+    in >> str;
+    if(str == "so") {
+        DsonValue* v = makeArray(in);
+        if (v->isError())
+            throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+        return static_cast<DsonArray*> (v);
+    } else
+        throw std::invalid_argument("Argument is not a DSON array");
 }
 
 void DsonBoolean::serialize(std::ostream& out) {
