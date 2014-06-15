@@ -20,7 +20,7 @@ THE SOFTWARE.
  */
 
 #include "dson.hpp"
-#include <cctype>
+#include <cstdint>
 #include <cmath>
 #include <string>
 #include <iostream>
