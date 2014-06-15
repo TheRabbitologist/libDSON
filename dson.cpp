@@ -361,5 +361,15 @@ void DsonArray::serialize(std::ostream& out) {
 
 void DsonObject::serialize(std::ostream& out) {
     out << "such ";
+    auto e = val.end(), l = val.end();
+    --l;
+    for (auto i = val.begin(); i != e; ++i) {
+        DsonString(i->first).serialize(out);
+        out << " is ";
+        i->second->serialize(out);
+        if (i != l)
+            out << " ,";
+        out << ' ';
+    }
     out << "wow";
 }

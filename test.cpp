@@ -14,10 +14,8 @@ int main() {
         std::cout << "FAIL: " << static_cast<DsonError*>(v)->what() << std::endl;
         return 0;
     }
-    DsonArray arr;
-    arr.val.push_back(new DsonString(L"I hate coffee"));
-    arr.val.push_back(new DsonString(L"I love tea"));
-    arr.val.push_back(new DsonString(L"Intercourse OJ"));
-    arr.serialize(std::cout);
+    DsonObject obj;
+    obj.val[L"foo"] = new DsonString(L"bar");
+    obj.serialize(std::cout);
     std::cout << std::endl;
 }
