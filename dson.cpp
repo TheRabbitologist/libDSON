@@ -195,11 +195,11 @@ static DsonValue* makeObject(std::istream& in) {
             if (!expectDelim && valu->getEntryType() != STRING) {
                 int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected string as key for a DSON object, got type ");
+                return new DsonError("Expected string as DSON object key");
             } else if (expectDelim && valu->getEntryType() != DELIM_OBJ) {
                 int v = valu->getEntryType();
                 delete valu;
-                return new DsonError("Expected delimiter in a DSON object, got type ");
+                return new DsonError("Expected object delimiter");
             } else if (expectDelim) {
                 expectDelim = false;
                 delete valu;
@@ -386,12 +386,13 @@ void DsonString::serialize(std::ostream& out) {
 }
 
 void DsonArray::serialize(std::ostream& out) {
-    std::srand(time(0)); //Yes, I know, this is C's random stuff, not C++'s.
+    bool flip = false;
     out << "so ";
     for (size_t i = 0; i < val.size(); ++i) {
         val[i]->serialize(out);
+        flip = !flip;
         if (i != val.size() - 1)
-            out << (std::rand() % 2 ? " and" : " also");
+            out << (flip ? " and" : " also");
         out << ' ';
     }
     out << "many";
