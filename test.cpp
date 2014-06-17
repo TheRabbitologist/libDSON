@@ -9,7 +9,7 @@
 #include <iostream>
 
 int main() {
-    DsonObject* obj = parseDsonV2Object("such \"bar\" is so 14. also yes many, \"foo\" is such \"marco\" is \"polo\" wow wow");
+    dson::DsonObject* obj = dson::parseDsonV2Object("such \"bar\" is so 14. also yes many, \"foo\" is such \"marco\" is \"polo\" wow wow");
     obj->serialize(std::cout);
     std::cout << std::endl;
 }
