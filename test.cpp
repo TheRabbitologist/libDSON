@@ -15,7 +15,7 @@ int main() {
 	std::vector<std::string> s = {"inter","course"};
 	std::vector<std::wstring> w = {L"I see you shiver with antici",L"pation."};
 	
-	//dson::DsonArray ab(b.begin(),b.end());
+	dson::DsonArray ab(b.begin(),b.end());
 	dson::DsonArray tb(t.begin(),t.end());
 	dson::DsonArray fb(f.begin(),f.end());
 	dson::DsonArray sb(s.begin(),s.end());

@@ -84,15 +84,18 @@ namespace dson {
         bool val;
     };
 	 
-	template <typename T, typename std::enable_if<(std::is_integral<T>::value && !std::is_same<T,bool>::value) || std::is_floating_point<T>::value>::type* = nullptr>
+	template <typename T,
+		typename std::enable_if<(std::is_integral<T>::value && !std::is_same<T,bool>::value) || std::is_floating_point<T>::value>::type* = nullptr>
 	DsonValue* makeValue(T val) {
 		return new DsonNumber(val);
 	}
-	template <typename T, typename std::enable_if<std::is_same<T,std::string>::value||std::is_same<T,std::wstring>::value>::type* = nullptr>
+	template <typename T,
+		typename std::enable_if<std::is_same<T,std::string>::value || std::is_same<T,std::wstring>::value>::type* = nullptr>
 	DsonValue* makeValue(T val) {
 		return new DsonString(val);
 	}
-	template <typename T, typename std::enable_if<std::is_same<T,bool>::value>::type* = nullptr>
+	template <typename T,
+		typename std::enable_if<std::is_same<T,bool>::value || (std::is_convertible<T,bool>::value && std::is_compound<T>::value)>::type* = nullptr>
 	DsonValue* makeValue(T val) {
 		return new DsonBoolean(val);
 	}
