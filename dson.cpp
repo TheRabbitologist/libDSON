@@ -191,10 +191,12 @@ namespace dson {
                 if (!expectDelim && valu->getEntryType() != STRING) {
                     int v = valu->getEntryType();
                     delete valu;
+					delete obj;
                     return new DsonError("Expected string as DSON object key");
                 } else if (expectDelim && valu->getEntryType() != DELIM_OBJ) {
                     int v = valu->getEntryType();
                     delete valu;
+					delete obj;
                     return new DsonError("Expected object delimiter");
                 } else if (expectDelim) {
                     expectDelim = false;
@@ -215,9 +217,11 @@ namespace dson {
                     expectDelim = true;
                 } else if (!temp.empty()) {
                     delete valu;
+					delete obj;
                     return new DsonError("Expected 'is'");
                 }
             }
+			delete valu;
             valu = parseValue(in);
         }
         return obj;
