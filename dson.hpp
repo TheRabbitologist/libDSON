@@ -55,7 +55,7 @@ namespace dson {
     struct DsonError : public DsonValue {
         explicit DsonError(std::string what) : DsonValue(ERROR), desc(what) {}
         const char* what() {return desc.c_str();}
-		void serialize(std::ostream& out) {throw std::logic_error("Attempted to serialize an DsonError object");}
+		void serialize(std::ostream& out) {throw std::logic_error("Attempted to serialize a DsonError object");}
     private:
         const std::string desc;
     };
@@ -100,19 +100,19 @@ namespace dson {
     DsonValue* parseDsonV2Value(std::istream& in);
     DsonValue* parseDsonV2Value(std::istream&& in);
     inline DsonValue* parseDsonV2Value(const std::string& in) {
-        return parseDsonV2Value(std::stringstream(in));
+        return parseDsonV2Value(std::istringstream(in));
     }
 
     DsonObject* parseDsonV2Object(std::istream& in);
     DsonObject* parseDsonV2Object(std::istream&& in);
     inline DsonObject* parseDsonV2Object(const std::string& in) {
-        return parseDsonV2Object(std::stringstream(in));
+        return parseDsonV2Object(std::istringstream(in));
     }
 
     DsonArray* parseDsonV2Array(std::istream& in);
     DsonArray* parseDsonV2Array(std::istream&& in);
     inline DsonArray* parseDsonV2Array(const std::string& in) {
-        return parseDsonV2Array(std::stringstream(in));
+        return parseDsonV2Array(std::istringstream(in));
     } 
 }
 
