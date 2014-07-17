@@ -60,9 +60,11 @@ namespace dson {
     };
 
     struct DsonString : public DsonValue {
-        DsonString(std::wstring str) : DsonValue(STRING), val(str) {}
+        DsonString(const std::wstring& str) : DsonValue(STRING), val(str) {}
+        DsonString(const std::string& str) : DsonValue(STRING), val(str.begin(), str.end()) {}
         DsonString() : DsonValue(STRING) {}
         void serialize(std::ostream& out);
+		inline void set(const std::string& str) {val = std::wstring(str.begin(), str.end());}
         std::wstring val;
     };
 
@@ -81,7 +83,7 @@ namespace dson {
     };
 
     struct DsonObject : public DsonValue {
-        DsonObject(std::map<std::wstring, DsonValue*> obj) : DsonValue(OBJECT), val(obj) {}
+        DsonObject(const std::map<std::wstring, DsonValue*>& obj) : DsonValue(OBJECT), val(obj) {}
         DsonObject() : DsonValue(OBJECT) {}
         void serialize(std::ostream& out);
         std::map<std::wstring, DsonValue*> val;
