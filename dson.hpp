@@ -55,6 +55,7 @@ namespace dson {
     struct DsonError : public DsonValue {
         explicit DsonError(std::string what) : DsonValue(ERROR), desc(what) {}
         const char* what() {return desc.c_str();}
+		void serialize(std::ostream& out) {throw std::logic_error("Attempted to serialize an DsonError object");}
     private:
         const std::string desc;
     };
