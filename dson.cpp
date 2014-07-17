@@ -221,9 +221,9 @@ namespace dson {
                     return new DsonError("Expected 'is'");
                 }
             }
-			delete valu;
             valu = parseValue(in);
         }
+		delete valu;
         return obj;
     }
 
