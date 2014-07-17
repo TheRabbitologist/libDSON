@@ -6,3 +6,4 @@ test.o
 dson.a
 .dep.inc
 test
+a.out

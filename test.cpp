@@ -9,7 +9,17 @@
 #include <iostream>
 
 int main() {
-    dson::DsonObject* obj = dson::parseDsonV2Object("such \"bar\" is so 14. also yes many, \"foo\" is such \"marco\" is \"polo\" wow wow");
-    obj->serialize(std::cout);
+	std::vector<bool> b = {true, false, false, true};
+	std::vector<int> t = {1, 2, 4, 8, 16, 32};
+	std::vector<float> f = {6,6,6,6,6.5};
+	std::vector<std::string> s = {"inter","course"};
+	std::vector<std::wstring> w = {L"I see you shiver with antici",L"pation."};
+	
+	//dson::DsonArray ab(b.begin(),b.end());
+	dson::DsonArray tb(t.begin(),t.end());
+	dson::DsonArray fb(f.begin(),f.end());
+	dson::DsonArray sb(s.begin(),s.end());
+	dson::DsonArray wb(w.begin(),w.end());
+	
     std::cout << std::endl;
 }

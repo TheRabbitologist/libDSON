@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include <sstream>
 #include <vector>
 #include <map>
+#include <type_traits>
 
 #ifndef DSON_HPP
 #define	DSON_HPP
@@ -75,8 +76,35 @@ namespace dson {
         void serialize(std::ostream& out);
         double val;
     };
+	
+    struct DsonBoolean : public DsonValue {
+        DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
+        DsonBoolean() : DsonValue(BOOLEAN) {}
+        void serialize(std::ostream& out);
+        bool val;
+    };
+	 
+	template <typename T, typename std::enable_if<(std::is_integral<T>::value && !std::is_same<T,bool>::value) || std::is_floating_point<T>::value>::type* = nullptr>
+	DsonValue* makeValue(T val) {
+		return new DsonNumber(val);
+	}
+	template <typename T, typename std::enable_if<std::is_same<T,std::string>::value||std::is_same<T,std::wstring>::value>::type* = nullptr>
+	DsonValue* makeValue(T val) {
+		return new DsonString(val);
+	}
+	template <typename T, typename std::enable_if<std::is_same<T,bool>::value>::type* = nullptr>
+	DsonValue* makeValue(T val) {
+		return new DsonBoolean(val);
+	}
 
     struct DsonArray : public DsonValue {
+		template <typename Iterator>
+        DsonArray(Iterator begin, Iterator end) : DsonValue(ARRAY) {
+			while (begin != end) {
+				val.push_back(makeValue(*begin));
+				++begin;
+			}
+		}
         DsonArray(const std::vector<DsonValue*>& arr) : DsonValue(ARRAY), val(arr) {}
         DsonArray() : DsonValue(ARRAY) {}
         void serialize(std::ostream& out);
@@ -88,13 +116,6 @@ namespace dson {
         DsonObject() : DsonValue(OBJECT) {}
         void serialize(std::ostream& out);
         std::map<std::wstring, DsonValue*> val;
-    };
-
-    struct DsonBoolean : public DsonValue {
-        DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
-        DsonBoolean() : DsonValue(BOOLEAN) {}
-        void serialize(std::ostream& out);
-        bool val;
     };
 
     DsonValue* parseDsonV2Value(std::istream& in);
