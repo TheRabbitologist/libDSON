@@ -23,6 +23,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <memory>
 #include <type_traits>
 
 #ifndef DSON_HPP
@@ -102,37 +103,29 @@ DsonValue* makeValue(T val) {
 	return new DsonBoolean(val);
 }
 
+template <typename T,
+		  typename std::enable_if<std::is_same<T,DsonValue>::value>::type* = nullptr>
+DsonValue* makeValue(T val) {
+	return &val;
+}
+
 struct DsonArray : public DsonValue {
 	template <typename Iterator>
 	DsonArray(Iterator begin, Iterator end) : DsonValue(ARRAY) {
 		while (begin != end) {
-			val.push_back(makeValue(*begin));
+			val.push_back(std::unique_ptr<DsonValue>(makeValue(*begin)));
 			++begin;
 		}
 	}
-	DsonArray(const std::vector<DsonValue*>& arr) : DsonValue(ARRAY), val(arr) {}
 	DsonArray() : DsonValue(ARRAY) {}
-	~DsonArray() {
-		if(!doDelete)
-			return;
-		for(auto element : val)
-			delete element;
-	}
 	void serialize(std::ostream& out);
-	std::vector<DsonValue*> val;
+	std::vector<std::unique_ptr<DsonValue>> val;
 };
 
 struct DsonObject : public DsonValue {
-	DsonObject(const std::map<std::wstring, DsonValue*>& obj) : DsonValue(OBJECT), val(obj) {}
 	DsonObject() : DsonValue(OBJECT) {}
-	~DsonObject() {
-		if(!doDelete)
-			return;
-		for(auto pare : val)
-			delete pare.second;
-	}
 	void serialize(std::ostream& out);
-	std::map<std::wstring, DsonValue*> val;
+	std::map<std::wstring, std::unique_ptr<DsonValue>> val;
 };
 
 DsonValue* parseDsonV2Value(std::istream& in);

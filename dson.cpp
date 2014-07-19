@@ -166,20 +166,25 @@ static DsonValue* makeArray(std::istream& in) {
 			delete arr;
 			return valu;
 		}
-		if (!expectDelim && valu->getEntryType() != DELIM_ARR) {
-			arr->val.push_back(valu);
-			expectDelim = true;
-		} else if (expectDelim && valu->getEntryType() == DELIM_ARR) {
+		if(expectDelim) {
+			auto t = valu->getEntryType();
 			delete valu;
-			expectDelim = false;
-		} else if (expectDelim && valu->getEntryType() != DELIM_ARR) {
-			delete valu;
-			delete arr;
-			return new DsonError("Expected array delimiter");
-		} else if (!expectDelim && valu->getEntryType() == DELIM_ARR) {
-			delete valu;
-			delete arr;
-			return new DsonError("Unexpected array delimiter");
+			if(t == DELIM_ARR)
+				expectDelim = false;
+			else {
+				delete arr;
+				return new DsonError("Expected array delimiter");
+			}
+		} else {
+			if(valu->getEntryType() != DELIM_ARR) {
+				arr->val.emplace_back(std::unique_ptr<DsonValue>(valu));
+				expectDelim = true;
+			}
+			else {
+				delete valu;
+				delete arr;
+				return new DsonError("Unexpected array delimiter");
+			}
 		}
 		valu = parseValue(in);
 	}
@@ -221,7 +226,7 @@ static DsonValue* makeObject(std::istream& in) {
 				foundIs = true;
 				delete valu;
 			} else if (foundIs) {
-				obj->val[temp] = valu;
+				obj->val.emplace(std::make_pair(temp, std::unique_ptr<DsonValue>(valu)));
 				temp.clear();
 				foundIs = false;
 				expectDelim = true;
