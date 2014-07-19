@@ -297,8 +297,11 @@ DsonObject* parseDsonV2Object(std::istream& in) {
 	in >> str;
 	if(str == "such") {
 		DsonValue* v = makeObject(in);
-		if (v->isError())
-			throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+		if (v->isError()) {
+			std::string err = static_cast<DsonError*>(v)->what();
+			delete v;
+			throw std::invalid_argument(err);
+		}
 		return static_cast<DsonObject*> (v);
 	} else
 		throw std::invalid_argument("Argument is not a DSON object");
@@ -309,8 +312,11 @@ DsonObject* parseDsonV2Object(std::istream&& in) {
 	in >> str;
 	if(str == "such") {
 		DsonValue* v = makeObject(in);
-		if (v->isError())
-			throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+		if (v->isError()) {
+			std::string err = static_cast<DsonError*>(v)->what();
+			delete v;
+			throw std::invalid_argument(err);
+		}
 		return static_cast<DsonObject*> (v);
 	} else
 		throw std::invalid_argument("Argument is not a DSON object");
@@ -321,8 +327,11 @@ DsonArray* parseDsonV2Array(std::istream& in) {
 	in >> str;
 	if(str == "so") {
 		DsonValue* v = makeArray(in);
-		if (v->isError())
-			throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+		if (v->isError()) {
+			std::string err = static_cast<DsonError*>(v)->what();
+			delete v;
+			throw std::invalid_argument(err);
+		}
 		return static_cast<DsonArray*> (v);
 	} else
 		throw std::invalid_argument("Argument is not a DSON array");
@@ -333,8 +342,11 @@ DsonArray* parseDsonV2Array(std::istream&& in) {
 	in >> str;
 	if(str == "so") {
 		DsonValue* v = makeArray(in);
-		if (v->isError())
-			throw std::invalid_argument(static_cast<DsonError*>(v)->what());
+		if (v->isError()) {
+			std::string err = static_cast<DsonError*>(v)->what();
+			delete v;
+			throw std::invalid_argument(err);
+		}
 		return static_cast<DsonArray*> (v);
 	} else
 		throw std::invalid_argument("Argument is not a DSON array");
