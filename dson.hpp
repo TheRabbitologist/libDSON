@@ -38,7 +38,7 @@ enum DsonEntryType {
 };
 
 struct DsonValue {
-	DsonValue() : type(EMPTY), doDelete(true) {};
+	DsonValue() : type(EMPTY) {};
 	inline DsonEntryType getEntryType() {return type;}
 	inline bool isValue() {
 		return type == STRING ||
@@ -48,12 +48,10 @@ struct DsonValue {
 				type == OBJECT;
 	}
 	inline bool isError() {return type == ERROR;}
-	virtual DsonValue* noDelete() {doDelete = false; return this;}
 	virtual void serialize(std::ostream& out) {}
 protected:
-	DsonValue(DsonEntryType t) : doDelete(true) {this->type = t;}
+	DsonValue(DsonEntryType t) {this->type = t;}
 	DsonEntryType type;
-	bool doDelete;
 };
 
 struct DsonError : public DsonValue {
@@ -70,13 +68,28 @@ struct DsonString : public DsonValue {
 	DsonString() : DsonValue(STRING) {}
 	void serialize(std::ostream& out);
 	inline void set(const std::string& str) {val = std::wstring(str.begin(), str.end());}
+	inline void set(const std::wstring& value) {val = value;}
+	inline const std::wstring& get() {return val;}
+	inline void append(std::wstring::value_type ch) {val.push_back(ch);}
+	inline void append(const std::wstring& str) {val+=str;}
+	inline void append(const std::string& str) {
+		std::wstring wstr(str.begin(),str.end());
+		val+=wstr;
+	}
+	inline size_t size() {return val.size();}
+private:
 	std::wstring val;
+public:
+	decltype(val)& data() {return val;}
 };
 
 struct DsonNumber : public DsonValue {
 	DsonNumber(double value) : DsonValue(NUMBER), val(value) {}
 	DsonNumber() : DsonValue(NUMBER) {}
 	void serialize(std::ostream& out);
+	inline void set(double value = 0.0) {val = value;}
+	inline double get() {return val;}
+private:
 	double val;
 };
 
@@ -84,6 +97,10 @@ struct DsonBoolean : public DsonValue {
 	DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
 	DsonBoolean() : DsonValue(BOOLEAN) {}
 	void serialize(std::ostream& out);
+	inline void flip() {val = !val;}
+	inline void set(bool value = true) {val = value;}
+	inline bool get() {return val;}
+private:
 	bool val;
 };
 
@@ -102,30 +119,59 @@ template <typename T,
 DsonValue* makeValue(T val) {
 	return new DsonBoolean(val);
 }
-
 template <typename T,
 		  typename std::enable_if<std::is_same<T,DsonValue>::value>::type* = nullptr>
 DsonValue* makeValue(T val) {
 	return &val;
+}
+template <typename T,
+		  typename std::enable_if<std::is_same<T,DsonValue*>::value>::type* = nullptr>
+DsonValue* makeValue(T val) {
+	return val;
 }
 
 struct DsonArray : public DsonValue {
 	template <typename Iterator>
 	DsonArray(Iterator begin, Iterator end) : DsonValue(ARRAY) {
 		while (begin != end) {
-			val.push_back(std::unique_ptr<DsonValue>(makeValue(*begin)));
+			val.emplace_back(std::unique_ptr<DsonValue>(makeValue(*begin)));
 			++begin;
 		}
 	}
 	DsonArray() : DsonValue(ARRAY) {}
 	void serialize(std::ostream& out);
+	DsonValue& operator[](size_t indx);
+	void push_back(DsonValue* value) {
+		val.emplace_back(std::unique_ptr<DsonValue>(value));
+	}
+	void set(size_t indx, DsonValue* value) {
+		val.emplace(val.begin()+indx,std::unique_ptr<DsonValue>(value));
+	}
+	const DsonValue& get(size_t indx) {
+		return *val.at(indx);
+	}
+	inline size_t size() {return val.size();}
+private:
 	std::vector<std::unique_ptr<DsonValue>> val;
+public:
+	inline decltype(val)& data() {return val;}
 };
 
 struct DsonObject : public DsonValue {
 	DsonObject() : DsonValue(OBJECT) {}
 	void serialize(std::ostream& out);
+	DsonValue& operator[](const std::wstring& key);
+	void set(const std::wstring& key, DsonValue* value) {
+		val.emplace(std::make_pair(key, std::unique_ptr<DsonValue>(value)));
+	}
+	const DsonValue& get(const std::wstring& key) {
+		return *val.at(key);
+	}
+	inline size_t size() {return val.size();}
+private:
 	std::map<std::wstring, std::unique_ptr<DsonValue>> val;
+public:
+	inline decltype(val)& data() {return val;}
 };
 
 DsonValue* parseDsonV2Value(std::istream& in);

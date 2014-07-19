@@ -96,7 +96,7 @@ static DsonValue* parseValueNumber(std::istream& in) {
 				return new DsonError("Parsed numerical value is not octal");
 		}
 		ret = new DsonNumber();
-		static_cast<DsonNumber*> (ret)->val = val;
+		static_cast<DsonNumber*>(ret)->set(val);
 	} catch (const std::invalid_argument& e) {
 		return new DsonError(std::string("Syntax error while creating a number: ") + e.what());
 	}
@@ -144,7 +144,7 @@ static DsonValue* parseValueString(std::istream& in) {
 					delete ret;
 					return new DsonError(std::string("Escape sequence value exceeds max length of UTF-16"));
 				}
-				ret->val.push_back(static_cast<wchar_t> (t));
+				ret->append(t);
 				break;
 			default:
 				delete ret;
@@ -152,7 +152,7 @@ static DsonValue* parseValueString(std::istream& in) {
 			}
 		}
 		if (c != '\0')
-			ret->val.push_back(c);
+			ret->append(c);
 	}
 	return ret;
 }
@@ -177,7 +177,7 @@ static DsonValue* makeArray(std::istream& in) {
 			}
 		} else {
 			if(valu->getEntryType() != DELIM_ARR) {
-				arr->val.emplace_back(std::unique_ptr<DsonValue>(valu));
+				arr->push_back(valu);
 				expectDelim = true;
 			}
 			else {
@@ -219,14 +219,14 @@ static DsonValue* makeObject(std::istream& in) {
 				valu = parseValue(in);
 				continue;
 			}
-			temp.assign(static_cast<DsonString*> (valu)->val);
+			temp.assign(static_cast<DsonString*>(valu)->get());
 			delete valu;
 		} else {
 			if (!foundIs && valu->getEntryType() == IS) {
 				foundIs = true;
 				delete valu;
 			} else if (foundIs) {
-				obj->val.emplace(std::make_pair(temp, std::unique_ptr<DsonValue>(valu)));
+				obj->set(temp,valu);
 				temp.clear();
 				foundIs = false;
 				expectDelim = true;
@@ -262,12 +262,12 @@ static DsonValue* parseValue(std::istream& in) {
 	}
 	if (str == "yes") {
 		DsonBoolean* bl = new DsonBoolean();
-		bl->val = true;
+		bl->set(true);
 		return bl;
 	}
 	if (str == "no") {
 		DsonBoolean* bl = new DsonBoolean();
-		bl->val = false;
+		bl->set(false);
 		return bl;
 	}
 	if (str == "such")
