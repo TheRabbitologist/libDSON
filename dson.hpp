@@ -37,7 +37,7 @@ enum DsonEntryType {
 };
 
 struct DsonValue {
-	DsonValue() : type(EMPTY) {};
+	DsonValue() : type(EMPTY), doDelete(true) {};
 	inline DsonEntryType getEntryType() {return type;}
 	inline bool isValue() {
 		return type == STRING ||
@@ -47,10 +47,12 @@ struct DsonValue {
 				type == OBJECT;
 	}
 	inline bool isError() {return type == ERROR;}
+	virtual DsonValue* noDelete() {doDelete = false; return this;}
 	virtual void serialize(std::ostream& out) {}
 protected:
-	DsonValue(DsonEntryType t) {this->type = t;}
+	DsonValue(DsonEntryType t) : doDelete(true) {this->type = t;}
 	DsonEntryType type;
+	bool doDelete;
 };
 
 struct DsonError : public DsonValue {
@@ -110,6 +112,12 @@ struct DsonArray : public DsonValue {
 	}
 	DsonArray(const std::vector<DsonValue*>& arr) : DsonValue(ARRAY), val(arr) {}
 	DsonArray() : DsonValue(ARRAY) {}
+	~DsonArray() {
+		if(!doDelete)
+			return;
+		for(auto element : val)
+			delete element;
+	}
 	void serialize(std::ostream& out);
 	std::vector<DsonValue*> val;
 };
@@ -117,6 +125,12 @@ struct DsonArray : public DsonValue {
 struct DsonObject : public DsonValue {
 	DsonObject(const std::map<std::wstring, DsonValue*>& obj) : DsonValue(OBJECT), val(obj) {}
 	DsonObject() : DsonValue(OBJECT) {}
+	~DsonObject() {
+		if(!doDelete)
+			return;
+		for(auto pare : val)
+			delete pare.second;
+	}
 	void serialize(std::ostream& out);
 	std::map<std::wstring, DsonValue*> val;
 };
