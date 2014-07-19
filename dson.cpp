@@ -50,7 +50,7 @@ static double octal_stod(const std::string& str) {
 		if (str[ing] >= '0' && str[ing] < '8')
 			ret += static_cast<double> (str[ing] - '0') / std::pow(8, x);
 		else
-			throw std::invalid_argument(std::string("found non-octal character: ") + str[ing]);
+			return std::nan("");
 	}
 	for (size_t ing = dot - (isdot ? 1 : 0), x = 0; ing <= end; --ing, ++x) {
 		if (ing == 0 && str[ing] == '-') {
@@ -60,7 +60,7 @@ static double octal_stod(const std::string& str) {
 		if (str[ing] >= '0' && str[ing] < '8')
 			ret += (str[ing] - '0') * std::pow(8, x);
 		else
-			throw std::invalid_argument(std::string("found non-octal character: ") + str[ing]);
+			return std::nan("");
 		if (ing == 0)
 			break;
 	};
@@ -87,9 +87,13 @@ static DsonValue* parseValueNumber(std::istream& in) {
 			int exp = 1;
 			std::stringstream(temp.substr(pos + 4)) >> VERY_BASE >> exp;
 			val = octal_stod(temp.substr(0, pos));
+			if(val == std::nan(""))
+				return new DsonError("Parsed numerical value is not octal");
 			val = val * std::pow(VERY_MULT, exp);
 		} else {
 			val = octal_stod(temp);
+			if(val == std::nan(""))
+				return new DsonError("Parsed numerical value is not octal");
 		}
 		ret = new DsonNumber();
 		static_cast<DsonNumber*> (ret)->val = val;
@@ -127,9 +131,15 @@ static DsonValue* parseValueString(std::istream& in) {
 			case 'f': c = '\f';
 				break;
 			case 'u': c = '\0';
-				char buf[6];
+				char buf[7];
 				in.get(buf, 6);
-				t = octal_stod(std::string(buf));
+				buf[6] = '\0';
+				try {
+					std::istringstream(buf) >> std::oct >> t;
+				} catch(...) {
+					delete ret;
+					return new DsonError(std::string("Caught exception while parsing \\u in a string."));
+				}
 				if (t > std::numeric_limits<wchar_t>::max()) {
 					delete ret;
 					return new DsonError(std::string("Escape sequence value exceeds max length of UTF-16"));
