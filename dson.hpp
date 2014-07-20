@@ -37,7 +37,8 @@ enum DsonEntryType {
 	END_OBJ = 25, END_ARR = 24, DELIM_OBJ = 15, DELIM_ARR = 14, IS = 35
 };
 
-struct DsonValue {
+class DsonValue {
+public:
 	DsonValue() : type(EMPTY) {};
 	inline DsonEntryType getEntryType() {return type;}
 	inline bool isValue() {
@@ -54,15 +55,18 @@ protected:
 	DsonEntryType type;
 };
 
-struct DsonError : public DsonValue {
+class DsonError : public DsonValue {
+	const std::string desc;
+public:
 	explicit DsonError(std::string what) : DsonValue(ERROR), desc(what) {}
 	const char* what() {return desc.c_str();}
 	void serialize(std::ostream& out) {throw std::logic_error("Attempted to serialize a DsonError object");}
-private:
-	const std::string desc;
 };
 
-struct DsonString : public DsonValue {
+class DsonString : public DsonValue {
+	std::wstring val;
+public:
+	decltype(val)& data() {return val;}
 	DsonString(const std::wstring& str) : DsonValue(STRING), val(str) {}
 	DsonString(const std::string& str) : DsonValue(STRING), val(str.begin(), str.end()) {}
 	DsonString() : DsonValue(STRING) {}
@@ -77,31 +81,27 @@ struct DsonString : public DsonValue {
 		val+=wstr;
 	}
 	inline size_t size() {return val.size();}
-private:
-	std::wstring val;
-public:
-	decltype(val)& data() {return val;}
 };
 
 struct DsonNumber : public DsonValue {
+	double val;
+public:
 	DsonNumber(double value) : DsonValue(NUMBER), val(value) {}
 	DsonNumber() : DsonValue(NUMBER) {}
 	void serialize(std::ostream& out);
 	inline void set(double value = 0.0) {val = value;}
 	inline double get() {return val;}
-private:
-	double val;
 };
 
-struct DsonBoolean : public DsonValue {
+class DsonBoolean : public DsonValue {
+	bool val;
+public:
 	DsonBoolean(bool boolean) : DsonValue(BOOLEAN), val(boolean) {}
 	DsonBoolean() : DsonValue(BOOLEAN) {}
 	void serialize(std::ostream& out);
 	inline void flip() {val = !val;}
 	inline void set(bool value = true) {val = value;}
 	inline bool get() {return val;}
-private:
-	bool val;
 };
 
 template <typename T,
@@ -130,7 +130,10 @@ DsonValue* makeValue(T val) {
 	return val;
 }
 
-struct DsonArray : public DsonValue {
+class DsonArray : public DsonValue {
+	std::vector<std::unique_ptr<DsonValue>> val;
+public:
+	inline decltype(val)& data() {return val;}
 	template <typename Iterator>
 	DsonArray(Iterator begin, Iterator end) : DsonValue(ARRAY) {
 		while (begin != end) {
@@ -151,13 +154,12 @@ struct DsonArray : public DsonValue {
 		return *val.at(indx);
 	}
 	inline size_t size() {return val.size();}
-private:
-	std::vector<std::unique_ptr<DsonValue>> val;
-public:
-	inline decltype(val)& data() {return val;}
 };
 
-struct DsonObject : public DsonValue {
+class DsonObject : public DsonValue {
+	std::map<std::wstring, std::unique_ptr<DsonValue>> val;
+public:
+	inline decltype(val)& data() {return val;}
 	DsonObject() : DsonValue(OBJECT) {}
 	void serialize(std::ostream& out);
 	DsonValue& operator[](const std::wstring& key);
@@ -168,10 +170,6 @@ struct DsonObject : public DsonValue {
 		return *val.at(key);
 	}
 	inline size_t size() {return val.size();}
-private:
-	std::map<std::wstring, std::unique_ptr<DsonValue>> val;
-public:
-	inline decltype(val)& data() {return val;}
 };
 
 DsonValue* parseDsonV2Value(std::istream& in);
