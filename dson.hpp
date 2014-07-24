@@ -162,15 +162,23 @@ public:
 	inline decltype(val)& data() {return val;}
 	DsonObject() : DsonValue(OBJECT) {}
 	void serialize(std::ostream& out);
-	DsonValue& operator[](const std::wstring& key);
 	void set(const std::wstring& key, DsonValue* value) {
 		val.emplace(std::make_pair(key, std::unique_ptr<DsonValue>(value)));
+	}
+	void set(const std::string& key, DsonValue* value) {
+		val.emplace(std::make_pair(std::wstring(key.begin(),key.end()), std::unique_ptr<DsonValue>(value)));
 	}
 	const DsonValue& get(const std::wstring& key) {
 		return *val.at(key);
 	}
+	const DsonValue& get(const std::string& key) {
+		return *val.at(std::wstring(key.begin(),key.end()));
+	}
 	bool has(const std::wstring& key) {
 		return val.count(key);
+	}
+	bool has(const std::string& key) {
+		return val.count(std::wstring(key.begin(),key.end()));
 	}
 	inline size_t size() {return val.size();}
 };
