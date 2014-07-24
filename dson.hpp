@@ -19,6 +19,9 @@
  THE SOFTWARE.
  */
 
+#ifndef DSON_HPP
+#define	DSON_HPP
+
 #include <string>
 #include <sstream>
 #include <vector>
@@ -26,9 +29,7 @@
 #include <memory>
 #include <type_traits>
 #include <ostream>
-
-#ifndef DSON_HPP
-#define	DSON_HPP
+#include <istream>
 
 namespace dson {
 
@@ -81,6 +82,12 @@ public:
 		std::wstring wstr(str.begin(),str.end());
 		val+=wstr;
 	}
+	inline decltype(val.begin()) begin() {return val.begin();}
+	inline decltype(val.rbegin()) rbegin() {return val.rbegin();}
+	inline decltype(val.cbegin()) cbegin() {return val.cbegin();}
+	inline decltype(val.end()) end() {return val.end();}
+	inline decltype(val.rend()) rend() {return val.rend();}
+	inline decltype(val.cend()) cend() {return val.cend();}
 	inline size_t size() {return val.size();}
 };
 
@@ -154,6 +161,12 @@ public:
 	inline const DsonValue& get(size_t indx) {
 		return *val.at(indx);
 	}
+	inline decltype(val.begin()) begin() {return val.begin();}
+	inline decltype(val.rbegin()) rbegin() {return val.rbegin();}
+	inline decltype(val.cbegin()) cbegin() {return val.cbegin();}
+	inline decltype(val.end()) end() {return val.end();}
+	inline decltype(val.rend()) rend() {return val.rend();}
+	inline decltype(val.cend()) cend() {return val.cend();}
 	inline size_t size() {return val.size();}
 };
 
@@ -183,6 +196,12 @@ public:
 	inline bool has(const std::string& key) {
 		return val.count(std::wstring(key.begin(),key.end()));
 	}
+	inline decltype(val.begin()) begin() {return val.begin();}
+	inline decltype(val.rbegin()) rbegin() {return val.rbegin();}
+	inline decltype(val.cbegin()) cbegin() {return val.cbegin();}
+	inline decltype(val.end()) end() {return val.end();}
+	inline decltype(val.rend()) rend() {return val.rend();}
+	inline decltype(val.cend()) cend() {return val.cend();}
 	inline size_t size() {return val.size();}
 };
 
