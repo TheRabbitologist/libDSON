@@ -169,6 +169,9 @@ public:
 	const DsonValue& get(const std::wstring& key) {
 		return *val.at(key);
 	}
+	bool has(const std::wstring& key) {
+		return val.count(key);
+	}
 	inline size_t size() {return val.size();}
 };
 
