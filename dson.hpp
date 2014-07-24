@@ -25,6 +25,7 @@
 #include <map>
 #include <memory>
 #include <type_traits>
+#include <ostream>
 
 #ifndef DSON_HPP
 #define	DSON_HPP

@@ -23,7 +23,6 @@ THE SOFTWARE.
 #include <cstdint>
 #include <cmath>
 #include <string>
-#include <iostream>
 
 const int VERY_MULT = 8;
 const auto VERY_BASE = std::oct;
